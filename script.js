@@ -1,5 +1,5 @@
 // IMPORTANT: Replace this URL with your Google Apps Script web app URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyj7XRZdsY1ZapPUbF-l7FeUWicAL8bW3uVA7ivYsFGR00Nqy8TyRPtDHw3dZYHxA72OQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec";
 
 let currentDate = new Date();
 let selectedDate = null;
@@ -45,7 +45,7 @@ function setupEventListeners() {
 
 // Load data from Google Sheets
 function loadData() {
-  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyj7XRZdsY1ZapPUbF-l7FeUWicAL8bW3uVA7ivYsFGR00Nqy8TyRPtDHw3dZYHxA72OQ/exec") {
+  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec") {
     console.warn("Please set your Google Apps Script URL in script.js");
     diaryData = [];
     renderCalendar();
@@ -297,7 +297,7 @@ function saveEntry() {
     return;
   }
   
-  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyj7XRZdsY1ZapPUbF-l7FeUWicAL8bW3uVA7ivYsFGR00Nqy8TyRPtDHw3dZYHxA72OQ/exec") {
+  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec") {
     alert("Please set your Google Apps Script URL in script.js to save entries");
     return;
   }
