@@ -1,4 +1,4 @@
-const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyj7XRZdsY1ZapPUbF-l7FeUWicAL8bW3uVA7ivYsFGR00Nqy8TyRPtDHw3dZYHxA72OQ/exec";
 
 let currentDate = new Date();
 let selectedDate = null;
