@@ -2,21 +2,778 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Diarium</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diarium - Personal Diary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #2d2d2d;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background: #3a3a3a;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-btn, .icon-btn, .nav-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .menu-btn:hover, .icon-btn:hover, .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      font-size: 14px;
+      padding: 4px 8px;
+    }
+
+    #monthYear {
+      font-size: 20px;
+      font-weight: 500;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Calendar */
+    .calendar-container {
+      background: #3a3a3a;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      padding: 8px 0;
+      font-weight: 500;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .calendar-day.other-month {
+      color: #666;
+    }
+
+    .calendar-day.today {
+      background: #6a8cff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .calendar-day.selected {
+      background: #6a8cff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .calendar-day.has-entry::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 4px;
+      height: 4px;
+      background: #6a8cff;
+      border-radius: 50%;
+    }
+
+    .calendar-day.today.has-entry::after,
+    .calendar-day.selected.has-entry::after {
+      background: #000;
+    }
+
+    /* Entries List */
+    .entries-list {
+      background: #2d2d2d;
+      padding: 0;
+      max-height: calc(100vh - 450px);
+      overflow-y: auto;
+    }
+
+    .entry-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #3a3a3a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .entry-item:hover {
+      background: #3a3a3a;
+    }
+
+    .entry-date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      margin-right: 20px;
+    }
+
+    .entry-day {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    .entry-number {
+      font-size: 32px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .entry-content {
+      flex: 1;
+    }
+
+    .entry-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .entry-preview {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .no-entry {
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* Add Button */
+    .add-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background: #5574d9;
+      color: #ffffff;
+      border: none;
+      font-size: 36px;
+      font-weight: 300;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(85, 116, 217, 0.4);
+      transition: all 0.3s;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .add-btn:hover {
+      background: #6a8cff;
+      transform: scale(1.05);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #3a3a3a;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #4a4a4a;
+    }
+
+    .modal-header h3 {
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: #999;
+      font-size: 32px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+    }
+
+    .close-btn:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .modal-body p {
+      color: #6a8cff;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .modal-body input,
+    .modal-body textarea {
+      width: 100%;
+      background: #2d2d2d;
+      border: 1px solid #4a4a4a;
+      color: #ffffff;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      margin-bottom: 16px;
+    }
+
+    .modal-body input:focus,
+    .modal-body textarea:focus {
+      outline: none;
+      border-color: #6a8cff;
+    }
+
+    .modal-body textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 16px 20px;
+      border-top: 1px solid #4a4a4a;
+    }
+
+    .btn-secondary,
+    .btn-primary {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: #999;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: #6a8cff;
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #7a9cff;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #2d2d2d;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #4a4a4a;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      #monthYear {
+        font-size: 18px;
+        min-width: 150px;
+      }
+
+      .weekday {
+        font-size: 12px;
+      }
+
+      .calendar-day {
+        font-size: 14px;
+      }
+
+      .entry-number {
+        font-size: 28px;
+      }
+
+      .add-btn {
+        width: 56px;
+        height: 56px;
+        font-size: 32px;
+        bottom: 20px;
+        right: 20px;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <header>
-  <h2 id="monthYear"></h2>
+  <button class="menu-btn">☰</button>
+  <div class="month-nav">
+    <button id="prevMonth" class="nav-btn">▲</button>
+    <h2 id="monthYear">January 2026</h2>
+    <button id="nextMonth" class="nav-btn">▼</button>
+  </div>
+  <div class="header-icons">
+    <button class="icon-btn">📅</button>
+    <button class="icon-btn">🔄</button>
+  </div>
 </header>
 
-<div id="calendar"></div>
+<div class="calendar-container">
+  <div class="weekdays">
+    <div class="weekday">Mon</div>
+    <div class="weekday">Tue</div>
+    <div class="weekday">Wed</div>
+    <div class="weekday">Thu</div>
+    <div class="weekday">Fri</div>
+    <div class="weekday">Sat</div>
+    <div class="weekday">Sun</div>
+  </div>
+  
+  <div id="calendar" class="calendar-grid"></div>
+</div>
 
-<div id="entries"></div>
+<div id="entriesList" class="entries-list"></div>
 
-<button id="addBtn">+</button>
+<button id="addBtn" class="add-btn">+</button>
 
-<script src="script.js"></script>
+<!-- Modal -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add Entry</h3>
+      <button class="close-btn" id="closeModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="modalDate"></p>
+      <input type="text" id="entryTitle" placeholder="Title" maxlength="100">
+      <textarea id="entryNote" placeholder="Write your note here..." rows="6"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button id="cancelBtn" class="btn-secondary">Cancel</button>
+      <button id="saveBtn" class="btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// IMPORTANT: Replace with your Google Apps Script URL
+const SCRIPT_URL = "YOUR_GOOGLE_SCRIPT_URL_HERE";
+
+let currentDate = new Date();
+let selectedDate = null;
+let diaryData = [];
+
+// DOM elements
+const calendar = document.getElementById("calendar");
+const monthYear = document.getElementById("monthYear");
+const entriesList = document.getElementById("entriesList");
+const modal = document.getElementById("modal");
+const addBtn = document.getElementById("addBtn");
+const saveBtn = document.getElementById("saveBtn");
+const cancelBtn = document.getElementById("cancelBtn");
+const closeModalBtn = document.getElementById("closeModal");
+const entryTitle = document.getElementById("entryTitle");
+const entryNote = document.getElementById("entryNote");
+const modalDate = document.getElementById("modalDate");
+const prevMonth = document.getElementById("prevMonth");
+const nextMonth = document.getElementById("nextMonth");
+
+// Initialize
+function init() {
+  console.log("Initializing Diarium...");
+  loadData();
+  setupEventListeners();
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  addBtn.addEventListener("click", openModal);
+  saveBtn.addEventListener("click", saveEntry);
+  cancelBtn.addEventListener("click", closeModal);
+  closeModalBtn.addEventListener("click", closeModal);
+  prevMonth.addEventListener("click", () => changeMonth(-1));
+  nextMonth.addEventListener("click", () => changeMonth(1));
+  
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+}
+
+// Load data
+function loadData() {
+  if (SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+    console.warn("Google Script URL not set. Using demo mode.");
+    diaryData = [];
+    renderCalendar();
+    renderEntries();
+    return;
+  }
+
+  fetch(SCRIPT_URL)
+    .then(res => res.json())
+    .then(data => {
+      diaryData = data || [];
+      renderCalendar();
+      renderEntries();
+    })
+    .catch(err => {
+      console.error("Error loading data:", err);
+      diaryData = [];
+      renderCalendar();
+      renderEntries();
+    });
+}
+
+// Render calendar
+function renderCalendar() {
+  calendar.innerHTML = "";
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  monthYear.textContent = currentDate.toLocaleString("default", { 
+    month: "long", 
+    year: "numeric" 
+  });
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+  const todayDate = today.getDate();
+  
+  // Previous month days
+  for (let i = firstDayAdjusted - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const div = createDayElement(day, true);
+    calendar.appendChild(div);
+  }
+  
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const div = createDayElement(day, false);
+    const dateStr = formatDate(year, month, day);
+    
+    if (diaryData.some(entry => entry.date === dateStr)) {
+      div.classList.add("has-entry");
+    }
+    
+    if (isCurrentMonth && day === todayDate) {
+      div.classList.add("today");
+    }
+    
+    if (selectedDate === dateStr) {
+      div.classList.add("selected");
+    }
+    
+    div.addEventListener("click", () => selectDate(dateStr, div));
+    calendar.appendChild(div);
+  }
+  
+  // Next month days
+  const totalCells = calendar.children.length;
+  const remainingCells = 42 - totalCells;
+  
+  for (let day = 1; day <= remainingCells; day++) {
+    const div = createDayElement(day, true);
+    calendar.appendChild(div);
+  }
+}
+
+// Create day element
+function createDayElement(day, isOtherMonth) {
+  const div = document.createElement("div");
+  div.className = "calendar-day";
+  div.textContent = day;
+  
+  if (isOtherMonth) {
+    div.classList.add("other-month");
+  }
+  
+  return div;
+}
+
+// Format date
+function formatDate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// Select date
+function selectDate(dateStr, element) {
+  selectedDate = dateStr;
+  
+  document.querySelectorAll(".calendar-day").forEach(d => {
+    d.classList.remove("selected");
+  });
+  
+  element.classList.add("selected");
+  renderEntries();
+}
+
+// Change month
+function changeMonth(direction) {
+  currentDate.setMonth(currentDate.getMonth() + direction);
+  selectedDate = null;
+  renderCalendar();
+  renderEntries();
+}
+
+// Render entries
+function renderEntries() {
+  entriesList.innerHTML = "";
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  for (let day = daysInMonth; day >= 1; day--) {
+    const dateStr = formatDate(year, month, day);
+    const dayEntries = diaryData.filter(entry => entry.date === dateStr);
+    
+    const entryItem = document.createElement("div");
+    entryItem.className = "entry-item";
+    
+    const date = new Date(dateStr);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+    
+    let entryContent = "";
+    if (dayEntries.length > 0) {
+      const entry = dayEntries[0];
+      entryContent = `
+        <div class="entry-title">${escapeHtml(entry.title)}</div>
+        ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 50))}${entry.note.length > 50 ? "..." : ""}</div>` : ""}
+      `;
+      if (dayEntries.length > 1) {
+        entryContent += `<div class="entry-preview">+${dayEntries.length - 1} more</div>`;
+      }
+    } else {
+      entryContent = '<div class="no-entry">No entry</div>';
+    }
+    
+    entryItem.innerHTML = `
+      <div class="entry-date">
+        <div class="entry-day">${dayName}</div>
+        <div class="entry-number">${day}</div>
+      </div>
+      <div class="entry-content">
+        ${entryContent}
+      </div>
+    `;
+    
+    entryItem.addEventListener("click", () => {
+      const dayElement = Array.from(document.querySelectorAll(".calendar-day:not(.other-month)")).find(el => 
+        parseInt(el.textContent) === day
+      );
+      if (dayElement) selectDate(dateStr, dayElement);
+    });
+    
+    entriesList.appendChild(entryItem);
+  }
+}
+
+// Open modal
+function openModal() {
+  if (!selectedDate) {
+    alert("Please select a date first");
+    return;
+  }
+  
+  const date = new Date(selectedDate);
+  const dateDisplay = date.toLocaleDateString("en-US", { 
+    weekday: "long", 
+    year: "numeric", 
+    month: "long", 
+    day: "numeric" 
+  });
+  
+  modalDate.textContent = dateDisplay;
+  entryTitle.value = "";
+  entryNote.value = "";
+  
+  modal.classList.add("show");
+  entryTitle.focus();
+}
+
+// Close modal
+function closeModal() {
+  modal.classList.remove("show");
+}
+
+// Save entry
+function saveEntry() {
+  const title = entryTitle.value.trim();
+  const note = entryNote.value.trim();
+  
+  if (!title) {
+    alert("Please enter a title");
+    return;
+  }
+  
+  if (SCRIPT_URL === "YOUR_GOOGLE_SCRIPT_URL_HERE") {
+    alert("Please set your Google Apps Script URL in the HTML file");
+    return;
+  }
+  
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
+  
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      date: selectedDate, 
+      title: title, 
+      note: note 
+    })
+  })
+  .then(() => {
+    closeModal();
+    
+    diaryData.push({
+      date: selectedDate,
+      title: title,
+      note: note,
+      time: new Date().toISOString()
+    });
+    
+    renderCalendar();
+    renderEntries();
+    
+    setTimeout(() => loadData(), 1000);
+  })
+  .catch(err => {
+    console.error("Error saving:", err);
+    alert("Failed to save. Please try again.");
+  })
+  .finally(() => {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save";
+  });
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Start app
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+
 </body>
 </html>
