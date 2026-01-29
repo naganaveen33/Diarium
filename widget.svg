@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="420"
+     height="620"
+     viewBox="0 0 420 620">
+
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#1a1a1a"/>
+
+  <!-- Header -->
+  <rect x="12" y="12" rx="12" ry="12" width="396" height="64" fill="#2a2a2a"/>
+  <text x="28" y="44" font-size="20" fill="#6a8cff" font-family="Arial, sans-serif">
+    📅 Diarium
+  </text>
+  <text x="28" y="64" font-size="12" fill="#888" font-family="Arial, sans-serif">
+    Wed, Jan 28 2026
+  </text>
+
+  <!-- Day Card 1 (Today) -->
+  <rect x="12" y="96" rx="12" ry="12" width="396" height="80" fill="#2
