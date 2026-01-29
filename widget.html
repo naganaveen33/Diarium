@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diarium Widget</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1a1a1a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    .widget-container {
+      max-width: 100%;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #2a2a2a;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #6a8cff;
+    }
+
+    .header-date {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .refresh-btn {
+      background: transparent;
+      border: none;
+      color: #6a8cff;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .day-card {
+      background: #2a2a2a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      border-left: 3px solid #555;
+    }
+
+    .day-card.today {
+      border-left-color: #6a8cff;
+      background: #2d2d3a;
+    }
+
+    .day-card.has-entry {
+      border-left-color: #4ade80;
+    }
+
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .day-name {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .day-name.today {
+      color: #6a8cff;
+    }
+
+    .day-date {
+      font-size: 12px;
+      color: #aaa;
+      font-weight: 500;
+    }
+
+    .day-content {
+      margin-top: 6px;
+    }
+
+    .entry-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 3px;
+      line-height: 1.3;
+    }
+
+    .entry-note {
+      font-size: 12px;
+      color: #999;
+      line-height: 1.4;
+      margin-top: 3px;
+    }
+
+    .no-entry {
+      color: #666;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .entry-count {
+      display: inline-block;
+      background: #4ade80;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 8px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error {
+      background: #442020;
+      border-left-color: #ef4444;
+      color: #fca5a5;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 12px;
+      color: #555;
+      font-size: 10px;
+    }
+
+    .add-btn {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #6a8cff;
+      color: #000;
+      border: none;
+      font-size: 24px;
+      font-weight: 300;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(106, 140, 255, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinning {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="widget-container">
+  <div class="header">
+    <div>
+      <div class="header-title">📅 Diarium</div>
+      <div class="header-date" id="currentDate">Loading...</div>
+    </div>
+    <button class="refresh-btn" id="refreshBtn" title="Refresh">🔄</button>
+  </div>
+
+  <div id="content">
+    <div class="loading">Loading entries...</div>
+  </div>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<button class="add-btn" id="addBtn" title="Open full app">📝</button>
+
+<script>
+// ⚠️ IMPORTANT: Add your Google Apps Script URL here (same as main app)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMluN4wlGmiUrUUeKGsHuKsmeCGpqi-Cc7MVi5S9QfxT2dFSM4d96LlfjOgiB8mVEmsg/exec";
+
+let allData = [];
+
+// Initialize
+function init() {
+  updateCurrentDate();
+  loadData();
+  setupEventListeners();
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
+    loadData();
+    setTimeout(() => btn.classList.remove('spinning'), 1000);
+  });
+
+  document.getElementById('addBtn').addEventListener('click', () => {
+    // Redirect to full app
+    window.location.href = './index.html';
+  });
+}
+
+// Update current date display
+function updateCurrentDate() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { 
+    weekday: 'short',
+    month: 'short', 
+    day: 'numeric',
+    year: 'numeric'
+  });
+  document.getElementById('currentDate').textContent = dateStr;
+}
+
+// Load data from Google Sheets
+function loadData() {
+  const content = document.getElementById('content');
+  
+  if (!SCRIPT_URL || SCRIPT_URL === "") {
+    content.innerHTML = `
+      <div class="error">
+        ⚠️ Google Script URL not set. Widget will show demo data.
+        <br><br>
+        To connect to your Google Sheet, add the SCRIPT_URL in this file (same as main app).
+      </div>
+    `;
+    // Show demo data
+    showDemoData();
+    return;
+  }
+
+  content.innerHTML = '<div class="loading">Loading entries...</div>';
+
+  fetch(SCRIPT_URL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data || [];
+      renderWidget();
+      updateFooter();
+    })
+    .catch(err => {
+      console.error("Error loading data:", err);
+      content.innerHTML = `
+        <div class="error">
+          ❌ Failed to load entries. Check your internet connection or Google Script URL.
+        </div>
+      `;
+      // Show demo data as fallback
+      showDemoData();
+    });
+}
+
+// Render widget with today + 6 days
+function renderWidget() {
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  const today = new Date();
+  
+  // Generate 7 days (today + 6 ahead)
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    
+    const dateStr = formatDate(date);
+    const dayEntries = allData.filter(entry => entry.date === dateStr);
+    
+    const dayCard = createDayCard(date, dayEntries, i === 0);
+    content.appendChild(dayCard);
+  }
+
+  if (allData.length === 0) {
+    content.innerHTML += `
+      <div style="text-align: center; padding: 20px; color: #666; font-size: 12px;">
+        No entries yet. Click 📝 to add your first entry!
+      </div>
+    `;
+  }
+}
+
+// Create day card element
+function createDayCard(date, entries, isToday) {
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  
+  if (isToday) {
+    card.classList.add('today');
+  }
+  
+  if (entries.length > 0) {
+    card.classList.add('has-entry');
+  }
+
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+  const dayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  
+  let contentHtml = '';
+  
+  if (entries.length > 0) {
+    const entry = entries[0];
+    contentHtml = `
+      <div class="entry-title">${escapeHtml(entry.title)}</div>
+      ${entry.note ? `<div class="entry-note">${escapeHtml(truncate(entry.note, 80))}</div>` : ''}
+      ${entries.length > 1 ? `<span class="entry-count">+${entries.length - 1}</span>` : ''}
+    `;
+  } else {
+    contentHtml = '<div class="no-entry">No entry</div>';
+  }
+
+  card.innerHTML = `
+    <div class="day-header">
+      <span class="day-name ${isToday ? 'today' : ''}">${isToday ? '● ' : ''}${dayName}</span>
+      <span class="day-date">${dayDate}</span>
+    </div>
+    <div class="day-content">
+      ${contentHtml}
+    </div>
+  `;
+
+  return card;
+}
+
+// Show demo data when not connected
+function showDemoData() {
+  allData = [
+    { date: formatDate(new Date()), title: "Team Meeting", note: "Discuss Q1 project milestones and deliverables" },
+    { 
+      date: formatDate(new Date(Date.now() + 86400000)), 
+      title: "Doctor Appointment", 
+      note: "Annual checkup at 2 PM" 
+    },
+    { 
+      date: formatDate(new Date(Date.now() + 172800000)), 
+      title: "Grocery Shopping", 
+      note: "Milk, eggs, bread, vegetables" 
+    }
+  ];
+  renderWidget();
+  updateFooter();
+}
+
+// Update footer with stats
+function updateFooter() {
+  const footer = document.getElementById('footer');
+  const totalEntries = allData.length;
+  const today = new Date();
+  const next7Days = [];
+  
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    next7Days.push(formatDate(date));
+  }
+  
+  const entriesInWeek = allData.filter(entry => next7Days.includes(entry.date)).length;
+  
+  footer.textContent = `${entriesInWeek} entries this week • ${totalEntries} total`;
+}
+
+// Format date as YYYY-MM-DD
+function formatDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Truncate text
+function truncate(text, length) {
+  if (text.length <= length) return text;
+  return text.substring(0, length) + '...';
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+  loadData();
+}, 5 * 60 * 1000);
+
+// Start app
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
