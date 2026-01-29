@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diarium - Personal Diary</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>Diarium</title>
   <style>
     * {
       margin: 0;
@@ -14,7 +12,7 @@
     }
 
     body {
-      background: #2d2d2d;
+      background: #1a1a1a;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
@@ -23,7 +21,7 @@
 
     /* Header */
     header {
-      background: #3a3a3a;
+      background: #2a2a2a;
       padding: 12px 16px;
       display: flex;
       justify-content: space-between;
@@ -31,7 +29,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     .menu-btn, .icon-btn, .nav-btn {
@@ -56,8 +54,8 @@
     }
 
     .nav-btn {
-      font-size: 14px;
-      padding: 4px 8px;
+      font-size: 16px;
+      padding: 6px 10px;
     }
 
     #monthYear {
@@ -72,9 +70,35 @@
       gap: 8px;
     }
 
+    /* Search Bar */
+    .search-container {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      border-bottom: 1px solid #3a3a3a;
+    }
+
+    .search-box {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #6a8cff;
+    }
+
+    .search-box::placeholder {
+      color: #666;
+    }
+
     /* Calendar */
     .calendar-container {
-      background: #3a3a3a;
+      background: #2a2a2a;
       margin: 0;
       padding: 16px;
     }
@@ -88,8 +112,8 @@
 
     .weekday {
       text-align: center;
-      font-size: 14px;
-      color: #999;
+      font-size: 13px;
+      color: #888;
       padding: 8px 0;
       font-weight: 500;
     }
@@ -117,7 +141,7 @@
     }
 
     .calendar-day.other-month {
-      color: #666;
+      color: #555;
     }
 
     .calendar-day.today {
@@ -149,22 +173,25 @@
 
     /* Entries List */
     .entries-list {
-      background: #2d2d2d;
+      background: #1a1a1a;
       padding: 0;
-      max-height: calc(100vh - 450px);
-      overflow-y: auto;
+      min-height: 300px;
     }
 
     .entry-item {
       display: flex;
       align-items: center;
       padding: 16px 20px;
-      border-bottom: 1px solid #3a3a3a;
+      border-bottom: 1px solid #2a2a2a;
       cursor: pointer;
       transition: background 0.2s;
     }
 
     .entry-item:hover {
+      background: #2a2a2a;
+    }
+
+    .entry-item:active {
       background: #3a3a3a;
     }
 
@@ -177,16 +204,18 @@
     }
 
     .entry-day {
-      font-size: 12px;
-      color: #999;
+      font-size: 11px;
+      color: #888;
       text-transform: uppercase;
-      font-weight: 500;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }
 
     .entry-number {
       font-size: 32px;
       font-weight: 300;
-      line-height: 1;
+      line-height: 1.1;
+      margin-top: 2px;
     }
 
     .entry-content {
@@ -197,185 +226,233 @@
       font-size: 16px;
       font-weight: 500;
       margin-bottom: 4px;
+      color: #ffffff;
     }
 
     .entry-preview {
       font-size: 14px;
-      color: #999;
+      color: #888;
+      line-height: 1.4;
     }
 
     .no-entry {
-      color: #666;
+      color: #555;
       font-size: 14px;
     }
 
-    /* Add Button */
-    .add-btn {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 64px;
-      height: 64px;
-      border-radius: 16px;
-      background: #5574d9;
-      color: #ffffff;
-      border: none;
-      font-size: 36px;
-      font-weight: 300;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(85, 116, 217, 0.4);
-      transition: all 0.3s;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-    }
-
-    .add-btn:hover {
-      background: #6a8cff;
-      transform: scale(1.05);
-    }
-
-    /* Modal */
-    .modal {
+    /* Entry Edit Page (Full Screen) */
+    .entry-edit-page {
       display: none;
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 200;
-      justify-content: center;
-      align-items: center;
+      background: #1a1a1a;
+      z-index: 1000;
+      overflow-y: auto;
     }
 
-    .modal.show {
-      display: flex;
+    .entry-edit-page.show {
+      display: block;
     }
 
-    .modal-content {
-      background: #3a3a3a;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 80vh;
-      overflow: hidden;
-    }
-
-    .modal-header {
+    .edit-header {
+      background: #2a2a2a;
+      padding: 12px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px;
-      border-bottom: 1px solid #4a4a4a;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
-    .modal-header h3 {
-      font-size: 20px;
-      font-weight: 500;
-    }
-
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: #999;
-      font-size: 32px;
-      cursor: pointer;
-      line-height: 1;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-    }
-
-    .close-btn:hover {
-      color: #fff;
-    }
-
-    .modal-body {
-      padding: 20px;
-    }
-
-    .modal-body p {
-      color: #6a8cff;
-      margin-bottom: 16px;
-      font-weight: 500;
-    }
-
-    .modal-body input,
-    .modal-body textarea {
-      width: 100%;
-      background: #2d2d2d;
-      border: 1px solid #4a4a4a;
-      color: #ffffff;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-family: inherit;
-      margin-bottom: 16px;
-    }
-
-    .modal-body input:focus,
-    .modal-body textarea:focus {
-      outline: none;
-      border-color: #6a8cff;
-    }
-
-    .modal-body textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-
-    .modal-footer {
+    .edit-header-left {
       display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding: 16px 20px;
-      border-top: 1px solid #4a4a4a;
+      align-items: center;
+      gap: 16px;
     }
 
-    .btn-secondary,
-    .btn-primary {
-      padding: 10px 24px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-secondary {
+    .back-btn {
       background: transparent;
-      color: #999;
+      border: none;
+      color: #ffffff;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
     }
 
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: #fff;
+    .edit-date {
+      font-size: 18px;
+      font-weight: 500;
     }
 
-    .btn-primary {
+    .edit-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-action-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .edit-body {
+      padding: 0;
+    }
+
+    .edit-heading {
+      background: #1a1a1a;
+      border: none;
+      color: #888;
+      font-size: 24px;
+      font-weight: 600;
+      padding: 20px 20px 10px 20px;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .edit-heading::placeholder {
+      color: #555;
+    }
+
+    .edit-heading:focus {
+      outline: none;
+      color: #ffffff;
+    }
+
+    .edit-text {
+      background: #1a1a1a;
+      border: none;
+      color: #aaa;
+      font-size: 16px;
+      padding: 0 20px 20px 20px;
+      width: 100%;
+      min-height: 400px;
+      font-family: inherit;
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .edit-text::placeholder {
+      color: #555;
+    }
+
+    .edit-text:focus {
+      outline: none;
+      color: #ffffff;
+    }
+
+    .edit-footer {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      border-top: 1px solid #3a3a3a;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .footer-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      padding: 8px;
+      font-size: 11px;
+    }
+
+    .footer-action-icon {
+      font-size: 24px;
+    }
+
+    .save-btn {
       background: #6a8cff;
       color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      box-shadow: 0 4px 12px rgba(106, 140, 255, 0.4);
     }
 
-    .btn-primary:hover {
-      background: #7a9cff;
+    .save-btn:active {
+      transform: scale(0.98);
     }
 
-    ::-webkit-scrollbar {
-      width: 8px;
+    /* Search Results */
+    .search-results {
+      display: none;
+      background: #1a1a1a;
+      padding: 16px;
     }
 
-    ::-webkit-scrollbar-track {
-      background: #2d2d2d;
+    .search-results.show {
+      display: block;
     }
 
-    ::-webkit-scrollbar-thumb {
-      background: #4a4a4a;
-      border-radius: 4px;
+    .search-result-item {
+      background: #2a2a2a;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .search-result-item:hover {
+      background: #3a3a3a;
+    }
+
+    .search-result-date {
+      color: #6a8cff;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .search-result-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .search-result-text {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .highlight {
+      background: #6a8cff;
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #666;
+      padding: 40px 20px;
+      font-size: 16px;
     }
 
     @media (max-width: 768px) {
@@ -385,128 +462,158 @@
       }
 
       .weekday {
-        font-size: 12px;
+        font-size: 11px;
       }
 
       .calendar-day {
         font-size: 14px;
-      }
-
-      .entry-number {
-        font-size: 28px;
-      }
-
-      .add-btn {
-        width: 56px;
-        height: 56px;
-        font-size: 32px;
-        bottom: 20px;
-        right: 20px;
       }
     }
   </style>
 </head>
 <body>
 
-<header>
-  <button class="menu-btn">☰</button>
-  <div class="month-nav">
-    <button id="prevMonth" class="nav-btn">▲</button>
-    <h2 id="monthYear">January 2026</h2>
-    <button id="nextMonth" class="nav-btn">▼</button>
-  </div>
-  <div class="header-icons">
-    <button class="icon-btn">📅</button>
-    <button class="icon-btn">🔄</button>
-  </div>
-</header>
+<!-- Main View -->
+<div id="mainView">
+  <header>
+    <button class="menu-btn">☰</button>
+    <div class="month-nav">
+      <button id="prevMonth" class="nav-btn">◀</button>
+      <h2 id="monthYear">January 2026</h2>
+      <button id="nextMonth" class="nav-btn">▶</button>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn" id="searchToggle">🔍</button>
+      <button class="icon-btn">⚙️</button>
+    </div>
+  </header>
 
-<div class="calendar-container">
-  <div class="weekdays">
-    <div class="weekday">Mon</div>
-    <div class="weekday">Tue</div>
-    <div class="weekday">Wed</div>
-    <div class="weekday">Thu</div>
-    <div class="weekday">Fri</div>
-    <div class="weekday">Sat</div>
-    <div class="weekday">Sun</div>
+  <div class="search-container" id="searchContainer" style="display: none;">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search entries...">
   </div>
-  
-  <div id="calendar" class="calendar-grid"></div>
+
+  <div id="searchResults" class="search-results"></div>
+
+  <div id="calendarView">
+    <div class="calendar-container">
+      <div class="weekdays">
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+        <div class="weekday">Sun</div>
+      </div>
+      
+      <div id="calendar" class="calendar-grid"></div>
+    </div>
+
+    <div id="entriesList" class="entries-list"></div>
+  </div>
 </div>
 
-<div id="entriesList" class="entries-list"></div>
+<!-- Entry Edit Page -->
+<div id="entryEditPage" class="entry-edit-page">
+  <div class="edit-header">
+    <div class="edit-header-left">
+      <button class="back-btn" id="backBtn">←</button>
+      <div class="edit-date" id="editDate">Tue, 27 Jan 26</div>
+    </div>
+    <div class="edit-header-right">
+      <button class="header-action-btn">◀</button>
+      <button class="header-action-btn">▶</button>
+      <button class="header-action-btn">⋮</button>
+    </div>
+  </div>
 
-<button id="addBtn" class="add-btn">+</button>
+  <div class="edit-body">
+    <input type="text" class="edit-heading" id="editHeading" placeholder="Heading">
+    <textarea class="edit-text" id="editText" placeholder="Text"></textarea>
+  </div>
 
-<!-- Modal -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Add Entry</h3>
-      <button class="close-btn" id="closeModal">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p id="modalDate"></p>
-      <input type="text" id="entryTitle" placeholder="Title" maxlength="100">
-      <textarea id="entryNote" placeholder="Write your note here..." rows="6"></textarea>
-    </div>
-    <div class="modal-footer">
-      <button id="cancelBtn" class="btn-secondary">Cancel</button>
-      <button id="saveBtn" class="btn-primary">Save</button>
-    </div>
+  <button class="save-btn" id="saveBtnEdit">💾 Save</button>
+
+  <div class="edit-footer">
+    <button class="footer-action">
+      <span class="footer-action-icon">📷</span>
+      <span>Photo</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">🏷️</span>
+      <span>Tags</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">⭐</span>
+      <span>Rating</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">🎤</span>
+      <span>Audio</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">📎</span>
+      <span>File</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">📍</span>
+      <span>Location</span>
+    </button>
   </div>
 </div>
 
 <script>
-// IMPORTANT: Replace with your Google Apps Script URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec";
+// ⚠️ IMPORTANT: Add your Google Apps Script URL here
+// Get it from: Apps Script → Deploy → Web app URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMluN4wlGmiUrUUeKGsHuKsmeCGpqi-Cc7MVi5S9QfxT2dFSM4d96LlfjOgiB8mVEmsg/exec";  // Leave empty to work without Google Sheets (demo mode)
 
 let currentDate = new Date();
 let selectedDate = null;
 let diaryData = [];
+let allData = []; // Store all data for search
 
 // DOM elements
 const calendar = document.getElementById("calendar");
 const monthYear = document.getElementById("monthYear");
 const entriesList = document.getElementById("entriesList");
-const modal = document.getElementById("modal");
-const addBtn = document.getElementById("addBtn");
-const saveBtn = document.getElementById("saveBtn");
-const cancelBtn = document.getElementById("cancelBtn");
-const closeModalBtn = document.getElementById("closeModal");
-const entryTitle = document.getElementById("entryTitle");
-const entryNote = document.getElementById("entryNote");
-const modalDate = document.getElementById("modalDate");
 const prevMonth = document.getElementById("prevMonth");
 const nextMonth = document.getElementById("nextMonth");
+const mainView = document.getElementById("mainView");
+const entryEditPage = document.getElementById("entryEditPage");
+const backBtn = document.getElementById("backBtn");
+const editDate = document.getElementById("editDate");
+const editHeading = document.getElementById("editHeading");
+const editText = document.getElementById("editText");
+const saveBtnEdit = document.getElementById("saveBtnEdit");
+const searchToggle = document.getElementById("searchToggle");
+const searchContainer = document.getElementById("searchContainer");
+const searchBox = document.getElementById("searchBox");
+const searchResults = document.getElementById("searchResults");
+const calendarView = document.getElementById("calendarView");
 
 // Initialize
 function init() {
-  console.log("Initializing Diarium...");
+  console.log("🚀 Diarium initialized");
   loadData();
   setupEventListeners();
 }
 
 // Setup event listeners
 function setupEventListeners() {
-  addBtn.addEventListener("click", openModal);
-  saveBtn.addEventListener("click", saveEntry);
-  cancelBtn.addEventListener("click", closeModal);
-  closeModalBtn.addEventListener("click", closeModal);
   prevMonth.addEventListener("click", () => changeMonth(-1));
   nextMonth.addEventListener("click", () => changeMonth(1));
-  
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModal();
-  });
+  backBtn.addEventListener("click", closeEditPage);
+  saveBtnEdit.addEventListener("click", saveEntry);
+  searchToggle.addEventListener("click", toggleSearch);
+  searchBox.addEventListener("input", performSearch);
 }
 
-// Load data
+// Load data from Google Sheets
 function loadData() {
-  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec") {
-    console.warn("Google Script URL not set. Using demo mode.");
+  if (!SCRIPT_URL || SCRIPT_URL === "") {
+    console.log("📝 Demo mode - no Google Sheets connected");
     diaryData = [];
+    allData = [];
     renderCalendar();
     renderEntries();
     return;
@@ -515,16 +622,28 @@ function loadData() {
   fetch(SCRIPT_URL)
     .then(res => res.json())
     .then(data => {
-      diaryData = data || [];
+      allData = data || [];
+      filterDataForCurrentMonth();
       renderCalendar();
       renderEntries();
+      console.log("✅ Data loaded:", allData.length, "entries");
     })
     .catch(err => {
-      console.error("Error loading data:", err);
+      console.error("❌ Error loading data:", err);
       diaryData = [];
+      allData = [];
       renderCalendar();
       renderEntries();
     });
+}
+
+// Filter data for current month
+function filterDataForCurrentMonth() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
+  
+  diaryData = allData.filter(entry => entry.date && entry.date.startsWith(monthStr));
 }
 
 // Render calendar
@@ -560,7 +679,7 @@ function renderCalendar() {
     const div = createDayElement(day, false);
     const dateStr = formatDate(year, month, day);
     
-    if (diaryData.some(entry => entry.date === dateStr)) {
+    if (allData.some(entry => entry.date === dateStr)) {
       div.classList.add("has-entry");
     }
     
@@ -612,19 +731,21 @@ function selectDate(dateStr, element) {
     d.classList.remove("selected");
   });
   
-  element.classList.add("selected");
-  renderEntries();
+  if (element) {
+    element.classList.add("selected");
+  }
 }
 
 // Change month
 function changeMonth(direction) {
   currentDate.setMonth(currentDate.getMonth() + direction);
   selectedDate = null;
+  filterDataForCurrentMonth();
   renderCalendar();
   renderEntries();
 }
 
-// Render entries
+// Render entries list
 function renderEntries() {
   entriesList.innerHTML = "";
   
@@ -647,7 +768,7 @@ function renderEntries() {
       const entry = dayEntries[0];
       entryContent = `
         <div class="entry-title">${escapeHtml(entry.title)}</div>
-        ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 50))}${entry.note.length > 50 ? "..." : ""}</div>` : ""}
+        ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 60))}${entry.note.length > 60 ? "..." : ""}</div>` : ""}
       `;
       if (dayEntries.length > 1) {
         entryContent += `<div class="entry-preview">+${dayEntries.length - 1} more</div>`;
@@ -666,62 +787,82 @@ function renderEntries() {
       </div>
     `;
     
+    // Click to open entry editor
     entryItem.addEventListener("click", () => {
-      const dayElement = Array.from(document.querySelectorAll(".calendar-day:not(.other-month)")).find(el => 
-        parseInt(el.textContent) === day
-      );
-      if (dayElement) selectDate(dateStr, dayElement);
+      openEditPage(dateStr, dayEntries.length > 0 ? dayEntries[0] : null);
     });
     
     entriesList.appendChild(entryItem);
   }
 }
 
-// Open modal
-function openModal() {
-  if (!selectedDate) {
-    alert("Please select a date first");
-    return;
-  }
+// Open edit page
+function openEditPage(dateStr, existingEntry = null) {
+  selectedDate = dateStr;
   
-  const date = new Date(selectedDate);
+  const date = new Date(dateStr);
   const dateDisplay = date.toLocaleDateString("en-US", { 
-    weekday: "long", 
-    year: "numeric", 
-    month: "long", 
-    day: "numeric" 
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "2-digit"
   });
   
-  modalDate.textContent = dateDisplay;
-  entryTitle.value = "";
-  entryNote.value = "";
+  editDate.textContent = dateDisplay.replace(',', ',');
   
-  modal.classList.add("show");
-  entryTitle.focus();
+  if (existingEntry) {
+    editHeading.value = existingEntry.title || "";
+    editText.value = existingEntry.note || "";
+  } else {
+    editHeading.value = "";
+    editText.value = "";
+  }
+  
+  mainView.style.display = "none";
+  entryEditPage.classList.add("show");
+  
+  // Focus on heading
+  setTimeout(() => editHeading.focus(), 100);
 }
 
-// Close modal
-function closeModal() {
-  modal.classList.remove("show");
+// Close edit page
+function closeEditPage() {
+  entryEditPage.classList.remove("show");
+  mainView.style.display = "block";
+  renderCalendar();
+  renderEntries();
 }
 
 // Save entry
 function saveEntry() {
-  const title = entryTitle.value.trim();
-  const note = entryNote.value.trim();
+  const title = editHeading.value.trim();
+  const note = editText.value.trim();
   
-  if (!title) {
-    alert("Please enter a title");
+  if (!title && !note) {
+    alert("Please enter a heading or text");
     return;
   }
   
-  if (SCRIPT_URL === "https://script.google.com/macros/s/AKfycbz_xHIuLTVjcp05xJuUCDvmXgqPvXc5TYmQhRldeao8qXUvADc3aX-tsR6--JdK9iHK5w/exec") {
-    alert("Please set your Google Apps Script URL in the HTML file");
+  const heading = title || "Untitled";
+  
+  if (!SCRIPT_URL || SCRIPT_URL === "") {
+    // Demo mode - just add locally
+    console.log("💾 Saved locally (demo mode)");
+    
+    const existingIndex = allData.findIndex(e => e.date === selectedDate);
+    if (existingIndex >= 0) {
+      allData[existingIndex] = { date: selectedDate, title: heading, note: note };
+    } else {
+      allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
+    }
+    
+    filterDataForCurrentMonth();
+    closeEditPage();
     return;
   }
   
-  saveBtn.disabled = true;
-  saveBtn.textContent = "Saving...";
+  saveBtnEdit.disabled = true;
+  saveBtnEdit.textContent = "💾 Saving...";
   
   fetch(SCRIPT_URL, {
     method: "POST",
@@ -731,33 +872,112 @@ function saveEntry() {
     },
     body: JSON.stringify({ 
       date: selectedDate, 
-      title: title, 
+      title: heading, 
       note: note 
     })
   })
   .then(() => {
-    closeModal();
+    console.log("✅ Saved to Google Sheets");
     
-    diaryData.push({
-      date: selectedDate,
-      title: title,
-      note: note,
-      time: new Date().toISOString()
-    });
+    const existingIndex = allData.findIndex(e => e.date === selectedDate);
+    if (existingIndex >= 0) {
+      allData[existingIndex] = { date: selectedDate, title: heading, note: note };
+    } else {
+      allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
+    }
     
-    renderCalendar();
-    renderEntries();
+    filterDataForCurrentMonth();
+    closeEditPage();
     
     setTimeout(() => loadData(), 1000);
   })
   .catch(err => {
-    console.error("Error saving:", err);
-    alert("Failed to save. Please try again.");
+    console.error("❌ Error saving:", err);
+    alert("Failed to save. Check console.");
   })
   .finally(() => {
-    saveBtn.disabled = false;
-    saveBtn.textContent = "Save";
+    saveBtnEdit.disabled = false;
+    saveBtnEdit.textContent = "💾 Save";
   });
+}
+
+// Toggle search
+function toggleSearch() {
+  if (searchContainer.style.display === "none") {
+    searchContainer.style.display = "block";
+    searchBox.focus();
+  } else {
+    searchContainer.style.display = "none";
+    searchResults.classList.remove("show");
+    calendarView.style.display = "block";
+    searchBox.value = "";
+  }
+}
+
+// Perform search
+function performSearch() {
+  const query = searchBox.value.trim().toLowerCase();
+  
+  if (query === "") {
+    searchResults.classList.remove("show");
+    calendarView.style.display = "block";
+    return;
+  }
+  
+  calendarView.style.display = "none";
+  searchResults.classList.add("show");
+  
+  const results = allData.filter(entry => {
+    const titleMatch = entry.title && entry.title.toLowerCase().includes(query);
+    const noteMatch = entry.note && entry.note.toLowerCase().includes(query);
+    return titleMatch || noteMatch;
+  });
+  
+  if (results.length === 0) {
+    searchResults.innerHTML = '<div class="no-results">No entries found</div>';
+    return;
+  }
+  
+  searchResults.innerHTML = "";
+  
+  results.forEach(entry => {
+    const resultItem = document.createElement("div");
+    resultItem.className = "search-result-item";
+    
+    const date = new Date(entry.date);
+    const dateStr = date.toLocaleDateString("en-US", { 
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+    
+    const titleHighlighted = highlightText(entry.title || "", query);
+    const noteHighlighted = highlightText(entry.note || "", query);
+    
+    resultItem.innerHTML = `
+      <div class="search-result-date">${dateStr}</div>
+      <div class="search-result-title">${titleHighlighted}</div>
+      ${entry.note ? `<div class="search-result-text">${noteHighlighted}</div>` : ""}
+    `;
+    
+    resultItem.addEventListener("click", () => {
+      searchContainer.style.display = "none";
+      searchResults.classList.remove("show");
+      calendarView.style.display = "block";
+      searchBox.value = "";
+      openEditPage(entry.date, entry);
+    });
+    
+    searchResults.appendChild(resultItem);
+  });
+}
+
+// Highlight search term
+function highlightText(text, query) {
+  if (!text) return "";
+  const regex = new RegExp(`(${query})`, "gi");
+  return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
 }
 
 // Escape HTML
