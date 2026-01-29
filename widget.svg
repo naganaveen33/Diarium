@@ -3,7 +3,7 @@
      xmlns="http://www.w3.org/2000/svg">
 
   <!-- Background -->
-  <rect width="100%" height="100%" rx="24" fill="#1a1a1a"/>
+  <rect width="300%" height="300%" rx="24" fill="#1a1a1a"/>
 
   <!-- Header -->
   <rect x="16" y="16" width="388" height="64" rx="14" fill="#2a2a2a"/>
