@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diarium Widget</title>
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
       background: #1a1a1a;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     img {
       width: 100%;
@@ -16,10 +24,26 @@
       object-fit: contain;
       display: block;
     }
+    a {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
   </style>
 </head>
 <body>
-  <!-- Display latest screenshot -->
-  <img src="widget.png?ts=<?= Date.now() ?>" alt="Diarium Widget">
+  <!-- Image wrapped in link to live widget page -->
+  <a href="widget.html" target="_blank">
+    <img id="widget" src="widget.png" alt="Diarium Widget">
+  </a>
+
+  <script>
+    // Auto-refresh the image every 5 minutes (300000 ms)
+    const img = document.getElementById('widget');
+    setInterval(() => {
+      const timestamp = new Date().getTime();
+      img.src = 'widget.png?ts=' + timestamp;
+    }, 300000);
+  </script>
 </body>
 </html>
