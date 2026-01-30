@@ -1,11 +1,19 @@
-const puppeteer = require('puppeteer');
+const { chromium } = require('playwright');
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await chromium.launch();
   const page = await browser.newPage();
-  await page.setViewport({ width: 420, height: 560 });
-  await page.goto('https://naganaveen33.github.io/Diarium/widget.html', { waitUntil: 'networkidle2' });
+  
+  // Set viewport size if needed
+  await page.setViewportSize({ width: 1280, height: 720 });
+  
+  // Navigate to your URL
+  await page.goto('https://naganaveen33.github.io/Diarium/widget.html', {
+    waitUntil: 'networkidle'
+  });
+
+  // Take the screenshot and save it as widget.png
   await page.screenshot({ path: 'widget.png' });
+
   await browser.close();
-  console.log("Screenshot saved as widget.png");
 })();
