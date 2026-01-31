@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
   const page = await browser.newPage();
   
   // Set viewport size if needed
-  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.setViewportSize({ width: 900, height: 1200 });
   
   // Navigate to your URL
   await page.goto('https://naganaveen33.github.io/Diarium/widget.html', {
