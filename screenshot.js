@@ -4,16 +4,18 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch();
   const page = await browser.newPage();
   
-  // Set viewport size if needed
-  await page.setViewportSize({ width: 900, height: 1200 });
+  // Let page load first to get natural size
+  await page.goto('https://naganaveen33.github.io/Diarium/widget.html');
+  await page.waitForTimeout(3000);
   
-  // Navigate to your URL
-  await page.goto('https://naganaveen33.github.io/Diarium/widget.html', {
-    waitUntil: 'networkidle'
+  // Get the actual content height
+  const dimensions = await page.evaluate(() => {
+    const width = 900; // Fixed width
+    const height = document.body.scrollHeight; // Auto height
+    return { width, height };
   });
-
-  // Take the screenshot and save it as widget.png
-  await page.screenshot({ path: 'widget.png' });
-
+  
+  await page.setViewportSize(dimensions);
+  await page.screenshot({ path: 'widget.png', fullPage: true });
   await browser.close();
 })();
