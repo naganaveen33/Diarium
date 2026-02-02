@@ -2,20 +2,17 @@ const { chromium } = require('playwright');
 
 (async () => {
   const browser = await chromium.launch();
-  const page = await browser.newPage();
-  
-  // Let page load first to get natural size
-  await page.goto('https://naganaveen33.github.io/Diarium/widget.html');
-  await page.waitForTimeout(3000);
-  
-  // Get the actual content height
-  const dimensions = await page.evaluate(() => {
-    const width = 900; // Fixed width
-    const height = document.body.scrollHeight; // Auto height
-    return { width, height };
+  const context = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+    viewport: { width: 450, height: 600 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2
   });
   
-  await page.setViewportSize(dimensions);
-  await page.screenshot({ path: 'widget.png', fullPage: true });
+  const page = await context.newPage();
+  await page.goto('https://naganaveen33.github.io/Diarium/widget.html');
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: 'widget.png' });
   await browser.close();
 })();
