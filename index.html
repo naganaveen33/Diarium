@@ -19,7 +19,6 @@
       overflow-x: hidden;
     }
 
-    /* Header */
     header {
       background: #2a2a2a;
       padding: 12px 16px;
@@ -70,7 +69,6 @@
       gap: 8px;
     }
 
-    /* Search Bar */
     .search-container {
       background: #2a2a2a;
       padding: 12px 16px;
@@ -96,7 +94,6 @@
       color: #666;
     }
 
-    /* Calendar */
     .calendar-container {
       background: #2a2a2a;
       margin: 0;
@@ -171,7 +168,6 @@
       background: #000;
     }
 
-    /* Entries List */
     .entries-list {
       background: #1a1a1a;
       padding: 0;
@@ -218,6 +214,12 @@
       margin-top: 2px;
     }
 
+    .entry-month {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+
     .entry-content {
       flex: 1;
     }
@@ -240,7 +242,20 @@
       font-size: 14px;
     }
 
-    /* Entry Edit Page (Full Screen) */
+    .load-more {
+      text-align: center;
+      padding: 16px;
+      color: #6a8cff;
+      cursor: pointer;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 14px;
+    }
+
+    .load-more:hover {
+      background: #2a2a2a;
+    }
+
     .entry-edit-page {
       display: none;
       position: fixed;
@@ -395,26 +410,6 @@
       font-size: 24px;
     }
 
-    .save-btn {
-      background: #6a8cff;
-      color: #000;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      position: fixed;
-      bottom: 80px;
-      right: 16px;
-      box-shadow: 0 4px 12px rgba(106, 140, 255, 0.4);
-    }
-
-    .save-btn:active {
-      transform: scale(0.98);
-    }
-
-    /* Search Results */
     .search-results {
       display: none;
       background: #1a1a1a;
@@ -475,11 +470,9 @@
         font-size: 18px;
         min-width: 150px;
       }
-
       .weekday {
         font-size: 11px;
       }
-
       .calendar-day {
         font-size: 14px;
       }
@@ -488,7 +481,6 @@
 </head>
 <body>
 
-<!-- Main View -->
 <div id="mainView">
   <header>
     <button class="menu-btn">☰</button>
@@ -520,7 +512,6 @@
         <div class="weekday">Sat</div>
         <div class="weekday">Sun</div>
       </div>
-      
       <div id="calendar" class="calendar-grid"></div>
     </div>
 
@@ -528,7 +519,6 @@
   </div>
 </div>
 
-<!-- Entry Edit Page -->
 <div id="entryEditPage" class="entry-edit-page">
   <div class="edit-header">
     <div class="edit-header-left">
@@ -548,45 +538,26 @@
   </div>
 
   <div class="edit-footer">
-    <button class="footer-action">
-      <span class="footer-action-icon">📷</span>
-      <span>Photo</span>
-    </button>
-    <button class="footer-action">
-      <span class="footer-action-icon">🏷️</span>
-      <span>Tags</span>
-    </button>
-    <button class="footer-action">
-      <span class="footer-action-icon">⭐</span>
-      <span>Rating</span>
-    </button>
-    <button class="footer-action">
-      <span class="footer-action-icon">🎤</span>
-      <span>Audio</span>
-    </button>
-    <button class="footer-action">
-      <span class="footer-action-icon">📎</span>
-      <span>File</span>
-    </button>
-    <button class="footer-action">
-      <span class="footer-action-icon">📍</span>
-      <span>Location</span>
-    </button>
+    <button class="footer-action"><span class="footer-action-icon">📷</span><span>Photo</span></button>
+    <button class="footer-action"><span class="footer-action-icon">🏷️</span><span>Tags</span></button>
+    <button class="footer-action"><span class="footer-action-icon">⭐</span><span>Rating</span></button>
+    <button class="footer-action"><span class="footer-action-icon">🎤</span><span>Audio</span></button>
+    <button class="footer-action"><span class="footer-action-icon">📎</span><span>File</span></button>
+    <button class="footer-action"><span class="footer-action-icon">📍</span><span>Location</span></button>
   </div>
 </div>
 
 <script>
-// ⚠️ IMPORTANT: Add your Google Apps Script URL here
-// Get it from: Apps Script → Deploy → Web app URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVbbshTAMuvN802qSPFqKEK5hix7A9UdnmMoptjDRZ0V800rDv-ta6xeizd4pFLnZH3A/exec";  // Leave empty to work without Google Sheets (demo mode)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVbbshTAMuvN802qSPFqKEK5hix7A9UdnmMoptjDRZ0V800rDv-ta6xeizd4pFLnZH3A/exec";
 
-let currentDate = new Date();
-currentDate.setHours(0, 0, 0, 0); // Reset to midnight today
+// Initialize with TODAY'S date - FORCE CURRENT MONTH
+const today = new Date();
+let currentDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = null;
 let diaryData = [];
-let allData = []; // Store all data for search
+let allData = [];
+let daysLoaded = { past: 0, future: 0 };
 
-// DOM elements
 const calendar = document.getElementById("calendar");
 const monthYear = document.getElementById("monthYear");
 const entriesList = document.getElementById("entriesList");
@@ -605,14 +576,12 @@ const searchBox = document.getElementById("searchBox");
 const searchResults = document.getElementById("searchResults");
 const calendarView = document.getElementById("calendarView");
 
-// Initialize
 function init() {
-  console.log("🚀 Diarium initialized");
+  console.log("🚀 Diarium - Opening:", currentDate.toLocaleDateString('en-US', {month: 'long', year: 'numeric'}));
   loadData();
   setupEventListeners();
 }
 
-// Setup event listeners
 function setupEventListeners() {
   prevMonth.addEventListener("click", () => changeMonth(-1));
   nextMonth.addEventListener("click", () => changeMonth(1));
@@ -620,13 +589,26 @@ function setupEventListeners() {
   saveBtnEdit.addEventListener("click", saveEntry);
   searchToggle.addEventListener("click", toggleSearch);
   searchBox.addEventListener("input", performSearch);
+  entriesList.addEventListener("scroll", handleScroll);
 }
 
-// Load data from Google Sheets
+function handleScroll() {
+  const scrollTop = entriesList.scrollTop;
+  const scrollHeight = entriesList.scrollHeight;
+  const clientHeight = entriesList.clientHeight;
+  
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
+    loadMoreFuture();
+  }
+  
+  if (scrollTop < 100) {
+    loadMorePast();
+  }
+}
+
 function loadData() {
   if (!SCRIPT_URL || SCRIPT_URL === "") {
-    console.log("📝 Demo mode - no Google Sheets connected");
-    diaryData = [];
+    console.log("📝 Demo mode");
     allData = [];
     renderCalendar();
     renderEntries();
@@ -637,58 +619,41 @@ function loadData() {
     .then(res => res.json())
     .then(data => {
       allData = data || [];
-      filterDataForCurrentMonth();
+      console.log("✅ Loaded:", allData.length, "entries");
       renderCalendar();
       renderEntries();
-      console.log("✅ Data loaded:", allData.length, "entries");
     })
     .catch(err => {
-      console.error("❌ Error loading data:", err);
-      diaryData = [];
+      console.error("❌ Error:", err);
       allData = [];
       renderCalendar();
       renderEntries();
     });
 }
 
-// Filter data for current month
-function filterDataForCurrentMonth() {
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
-  
-  diaryData = allData.filter(entry => entry.date && entry.date.startsWith(monthStr));
-}
-
-// Render calendar
 function renderCalendar() {
   calendar.innerHTML = "";
   
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   
-  monthYear.textContent = currentDate.toLocaleString("default", { 
-    month: "long", 
-    year: "numeric" 
-  });
+  monthYear.textContent = currentDate.toLocaleString("default", { month: "long", year: "numeric" });
   
   const firstDay = new Date(year, month, 1).getDay();
   const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
   
-  const today = new Date();
-  const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
-  const todayDate = today.getDate();
+  const todayObj = new Date();
+  const isCurrentMonth = todayObj.getMonth() === month && todayObj.getFullYear() === year;
+  const todayDate = todayObj.getDate();
   
-  // Previous month days
   for (let i = firstDayAdjusted - 1; i >= 0; i--) {
     const day = daysInPrevMonth - i;
     const div = createDayElement(day, true);
     calendar.appendChild(div);
   }
   
-  // Current month days
   for (let day = 1; day <= daysInMonth; day++) {
     const div = createDayElement(day, false);
     const dateStr = formatDate(year, month, day);
@@ -709,7 +674,6 @@ function renderCalendar() {
     calendar.appendChild(div);
   }
   
-  // Next month days
   const totalCells = calendar.children.length;
   const remainingCells = 42 - totalCells;
   
@@ -719,113 +683,129 @@ function renderCalendar() {
   }
 }
 
-// Create day element
 function createDayElement(day, isOtherMonth) {
   const div = document.createElement("div");
   div.className = "calendar-day";
   div.textContent = day;
-  
-  if (isOtherMonth) {
-    div.classList.add("other-month");
-  }
-  
+  if (isOtherMonth) div.classList.add("other-month");
   return div;
 }
 
-// Format date
 function formatDate(year, month, day) {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
-// Select date
 function selectDate(dateStr, element) {
   selectedDate = dateStr;
-  
-  document.querySelectorAll(".calendar-day").forEach(d => {
-    d.classList.remove("selected");
-  });
-  
-  if (element) {
-    element.classList.add("selected");
-  }
+  document.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("selected"));
+  if (element) element.classList.add("selected");
 }
 
-// Change month
 function changeMonth(direction) {
   currentDate.setMonth(currentDate.getMonth() + direction);
   selectedDate = null;
-  filterDataForCurrentMonth();
+  daysLoaded = { past: 0, future: 0 };
   renderCalendar();
   renderEntries();
 }
 
-// Render entries list
 function renderEntries() {
   entriesList.innerHTML = "";
+  daysLoaded = { past: 0, future: 0 };
   
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const today = new Date();
-  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
-  const todayDate = today.getDate();
+  const startDate = new Date();
   
-  // Show from today down to day 1 (or full month if viewing past month)
-  const startDay = isCurrentMonth ? todayDate : daysInMonth;
+  // TODAY → +30 days (ascending order)
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+    addDayEntry(date);
+  }
   
-  for (let day = startDay; day >= 1; day--) {
-    const dateStr = formatDate(year, month, day);
-    const dayEntries = diaryData.filter(entry => entry.date === dateStr);
-    
-    const entryItem = document.createElement("div");
-    entryItem.className = "entry-item";
-    
-    const date = new Date(dateStr);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-    
-    let entryContent = "";
-    if (dayEntries.length > 0) {
-      const entry = dayEntries[0];
-      entryContent = `
-        <div class="entry-title">${escapeHtml(entry.title)}</div>
-        ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 60))}${entry.note.length > 60 ? "..." : ""}</div>` : ""}
-      `;
-      if (dayEntries.length > 1) {
-        entryContent += `<div class="entry-preview">+${dayEntries.length - 1} more</div>`;
-      }
-    } else {
-      entryContent = '<div class="no-entry">No entry</div>';
-    }
-    
-    entryItem.innerHTML = `
-      <div class="entry-date">
-        <div class="entry-day">${dayName}</div>
-        <div class="entry-number">${day}</div>
-      </div>
-      <div class="entry-content">
-        ${entryContent}
-      </div>
+  daysLoaded.future = 30;
+}
+
+function loadMorePast() {
+  if (daysLoaded.past >= 365) return;
+  
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - daysLoaded.past - 1);
+  
+  for (let i = 0; i < 15; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() - i);
+    addDayEntry(date, true);
+  }
+  
+  daysLoaded.past += 15;
+}
+
+function loadMoreFuture() {
+  if (daysLoaded.future >= 365) return;
+  
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + daysLoaded.future);
+  
+  for (let i = 0; i < 15; i++) {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + i);
+    addDayEntry(date, false);
+  }
+  
+  daysLoaded.future += 15;
+}
+
+function addDayEntry(date, prepend = false) {
+  const dateStr = formatDate(date.getFullYear(), date.getMonth(), date.getDate());
+  const dayEntries = allData.filter(entry => entry.date === dateStr);
+  
+  const entryItem = document.createElement("div");
+  entryItem.className = "entry-item";
+  
+  const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+  const monthName = date.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const day = date.getDate();
+  
+  let entryContent = "";
+  if (dayEntries.length > 0) {
+    const entry = dayEntries[0];
+    entryContent = `
+      <div class="entry-title">${escapeHtml(entry.title)}</div>
+      ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 60))}${entry.note.length > 60 ? "..." : ""}</div>` : ""}
     `;
-    
-    // Click to open entry editor
-    entryItem.addEventListener("click", () => {
-      openEditPage(dateStr, dayEntries.length > 0 ? dayEntries[0] : null);
-    });
-    
+    if (dayEntries.length > 1) {
+      entryContent += `<div class="entry-preview">+${dayEntries.length - 1} more</div>`;
+    }
+  } else {
+    entryContent = '<div class="no-entry">No entry</div>';
+  }
+  
+  entryItem.innerHTML = `
+    <div class="entry-date">
+      <div class="entry-day">${dayName}</div>
+      <div class="entry-number">${day}</div>
+      <div class="entry-month">${monthName}</div>
+    </div>
+    <div class="entry-content">${entryContent}</div>
+  `;
+  
+  entryItem.addEventListener("click", () => {
+    openEditPage(dateStr, dayEntries.length > 0 ? dayEntries[0] : null);
+  });
+  
+  if (prepend) {
+    entriesList.insertBefore(entryItem, entriesList.firstChild);
+  } else {
     entriesList.appendChild(entryItem);
   }
 }
 
-// Open edit page
 function openEditPage(dateStr, existingEntry = null) {
   selectedDate = dateStr;
   
   const date = new Date(dateStr);
   const dateDisplay = date.toLocaleDateString("en-US", { 
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "2-digit"
+    weekday: "short", day: "2-digit", month: "short", year: "2-digit"
   });
   
   editDate.textContent = dateDisplay.replace(',', ',');
@@ -840,45 +820,31 @@ function openEditPage(dateStr, existingEntry = null) {
   
   mainView.style.display = "none";
   entryEditPage.classList.add("show");
-  
-  // Focus on heading
   setTimeout(() => editHeading.focus(), 100);
 }
 
-// Close edit page
 function closeEditPage() {
-  // Auto-save if there's content
   const title = editHeading.value.trim();
   const note = editText.value.trim();
   
   if ((title || note) && selectedDate) {
-    // Save silently
     const heading = title || "Untitled";
     
     if (SCRIPT_URL && SCRIPT_URL !== "") {
       fetch(SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          date: selectedDate, 
-          title: heading, 
-          note: note 
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: selectedDate, title: heading, note: note })
       }).catch(err => console.error("Auto-save error:", err));
     }
     
-    // Update local data
     const existingIndex = allData.findIndex(e => e.date === selectedDate);
     if (existingIndex >= 0) {
       allData[existingIndex] = { date: selectedDate, title: heading, note: note };
     } else {
       allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
     }
-    
-    filterDataForCurrentMonth();
   }
   
   entryEditPage.classList.remove("show");
@@ -887,7 +853,6 @@ function closeEditPage() {
   renderEntries();
 }
 
-// Save entry
 function saveEntry() {
   const title = editHeading.value.trim();
   const note = editText.value.trim();
@@ -900,17 +865,13 @@ function saveEntry() {
   const heading = title || "Untitled";
   
   if (!SCRIPT_URL || SCRIPT_URL === "") {
-    // Demo mode - just add locally
     console.log("💾 Saved locally (demo mode)");
-    
     const existingIndex = allData.findIndex(e => e.date === selectedDate);
     if (existingIndex >= 0) {
       allData[existingIndex] = { date: selectedDate, title: heading, note: note };
     } else {
       allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
     }
-    
-    filterDataForCurrentMonth();
     closeEditPage();
     return;
   }
@@ -921,28 +882,18 @@ function saveEntry() {
   fetch(SCRIPT_URL, {
     method: "POST",
     mode: "no-cors",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ 
-      date: selectedDate, 
-      title: heading, 
-      note: note 
-    })
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date: selectedDate, title: heading, note: note })
   })
   .then(() => {
     console.log("✅ Saved to Google Sheets");
-    
     const existingIndex = allData.findIndex(e => e.date === selectedDate);
     if (existingIndex >= 0) {
       allData[existingIndex] = { date: selectedDate, title: heading, note: note };
     } else {
       allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
     }
-    
-    filterDataForCurrentMonth();
     closeEditPage();
-    
     setTimeout(() => loadData(), 1000);
   })
   .catch(err => {
@@ -955,7 +906,6 @@ function saveEntry() {
   });
 }
 
-// Toggle search
 function toggleSearch() {
   if (searchContainer.style.display === "none") {
     searchContainer.style.display = "block";
@@ -968,7 +918,6 @@ function toggleSearch() {
   }
 }
 
-// Perform search
 function performSearch() {
   const query = searchBox.value.trim().toLowerCase();
   
@@ -1000,10 +949,7 @@ function performSearch() {
     
     const date = new Date(entry.date);
     const dateStr = date.toLocaleDateString("en-US", { 
-      weekday: "short",
-      day: "2-digit",
-      month: "short",
-      year: "numeric"
+      weekday: "short", day: "2-digit", month: "short", year: "numeric"
     });
     
     const titleHighlighted = highlightText(entry.title || "", query);
@@ -1027,21 +973,18 @@ function performSearch() {
   });
 }
 
-// Highlight search term
 function highlightText(text, query) {
   if (!text) return "";
   const regex = new RegExp(`(${query})`, "gi");
   return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
 }
 
-// Escape HTML
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
 
-// Start app
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
 } else {
