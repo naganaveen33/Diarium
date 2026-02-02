@@ -578,7 +578,587 @@
 <script>
 // ⚠️ IMPORTANT: Add your Google Apps Script URL here
 // Get it from: Apps Script → Deploy → Web app URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznOdp_PkDSf1FpMs5daBrEVs_m9x9yJEIu8UXDoOzKW8oGtzhMQr3-KuUKTlXK1ATC6A/exec";  // Leave empty to work without Google Sheets (demo mode)
+const SCRIPT_URL = "<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diarium</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1a1a1a;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .menu-btn, .icon-btn, .nav-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .menu-btn:hover, .icon-btn:hover, .nav-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      font-size: 16px;
+      padding: 6px 10px;
+    }
+
+    #monthYear {
+      font-size: 20px;
+      font-weight: 500;
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .header-icons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Search Bar */
+    .search-container {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      border-bottom: 1px solid #3a3a3a;
+    }
+
+    .search-box {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      color: #ffffff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #6a8cff;
+    }
+
+    .search-box::placeholder {
+      color: #666;
+    }
+
+    /* Calendar */
+    .calendar-container {
+      background: #2a2a2a;
+      margin: 0;
+      padding: 16px;
+    }
+
+    .weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .weekday {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      padding: 8px 0;
+      font-weight: 500;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .calendar-day:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .calendar-day.other-month {
+      color: #555;
+    }
+
+    .calendar-day.today {
+      background: #6a8cff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .calendar-day.selected {
+      background: #6a8cff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .calendar-day.has-entry::after {
+      content: '';
+      position: absolute;
+      bottom: 4px;
+      width: 4px;
+      height: 4px;
+      background: #6a8cff;
+      border-radius: 50%;
+    }
+
+    .calendar-day.today.has-entry::after,
+    .calendar-day.selected.has-entry::after {
+      background: #000;
+    }
+
+    /* Entries List */
+    .entries-list {
+      background: #1a1a1a;
+      padding: 0;
+      min-height: 300px;
+    }
+
+    .entry-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #2a2a2a;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .entry-item:hover {
+      background: #2a2a2a;
+    }
+
+    .entry-item:active {
+      background: #3a3a3a;
+    }
+
+    .entry-date {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 60px;
+      margin-right: 20px;
+    }
+
+    .entry-day {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .entry-number {
+      font-size: 32px;
+      font-weight: 300;
+      line-height: 1.1;
+      margin-top: 2px;
+    }
+
+    .entry-content {
+      flex: 1;
+    }
+
+    .entry-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #ffffff;
+    }
+
+    .entry-preview {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.4;
+    }
+
+    .no-entry {
+      color: #555;
+      font-size: 14px;
+    }
+
+    /* Entry Edit Page (Full Screen) */
+    .entry-edit-page {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #1a1a1a;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .entry-edit-page.show {
+      display: block;
+    }
+
+    .edit-header {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .edit-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .edit-date {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .edit-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-action-btn {
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .save-btn-header {
+      background: #6a8cff;
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .save-btn-header:active {
+      transform: scale(0.95);
+    }
+
+    .edit-body {
+      padding: 0;
+    }
+
+    .edit-heading {
+      background: #1a1a1a;
+      border: none;
+      color: #888;
+      font-size: 24px;
+      font-weight: 600;
+      padding: 20px 20px 10px 20px;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .edit-heading::placeholder {
+      color: #555;
+    }
+
+    .edit-heading:focus {
+      outline: none;
+      color: #ffffff;
+    }
+
+    .edit-text {
+      background: #1a1a1a;
+      border: none;
+      color: #aaa;
+      font-size: 16px;
+      padding: 0 20px 20px 20px;
+      width: 100%;
+      min-height: 400px;
+      font-family: inherit;
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .edit-text::placeholder {
+      color: #555;
+    }
+
+    .edit-text:focus {
+      outline: none;
+      color: #ffffff;
+    }
+
+    .edit-footer {
+      background: #2a2a2a;
+      padding: 12px 16px;
+      border-top: 1px solid #3a3a3a;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .footer-action {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      padding: 8px;
+      font-size: 11px;
+    }
+
+    .footer-action-icon {
+      font-size: 24px;
+    }
+
+    .save-btn {
+      background: #6a8cff;
+      color: #000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      box-shadow: 0 4px 12px rgba(106, 140, 255, 0.4);
+    }
+
+    .save-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* Search Results */
+    .search-results {
+      display: none;
+      background: #1a1a1a;
+      padding: 16px;
+    }
+
+    .search-results.show {
+      display: block;
+    }
+
+    .search-result-item {
+      background: #2a2a2a;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .search-result-item:hover {
+      background: #3a3a3a;
+    }
+
+    .search-result-date {
+      color: #6a8cff;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .search-result-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .search-result-text {
+      color: #888;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .highlight {
+      background: #6a8cff;
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 2px;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #666;
+      padding: 40px 20px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+      #monthYear {
+        font-size: 18px;
+        min-width: 150px;
+      }
+
+      .weekday {
+        font-size: 11px;
+      }
+
+      .calendar-day {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Main View -->
+<div id="mainView">
+  <header>
+    <button class="menu-btn">☰</button>
+    <div class="month-nav">
+      <button id="prevMonth" class="nav-btn">◀</button>
+      <h2 id="monthYear">January 2026</h2>
+      <button id="nextMonth" class="nav-btn">▶</button>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn" id="searchToggle">🔍</button>
+      <button class="icon-btn">⚙️</button>
+    </div>
+  </header>
+
+  <div class="search-container" id="searchContainer" style="display: none;">
+    <input type="text" class="search-box" id="searchBox" placeholder="Search entries...">
+  </div>
+
+  <div id="searchResults" class="search-results"></div>
+
+  <div id="calendarView">
+    <div class="calendar-container">
+      <div class="weekdays">
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+        <div class="weekday">Sun</div>
+      </div>
+      
+      <div id="calendar" class="calendar-grid"></div>
+    </div>
+
+    <div id="entriesList" class="entries-list"></div>
+  </div>
+</div>
+
+<!-- Entry Edit Page -->
+<div id="entryEditPage" class="entry-edit-page">
+  <div class="edit-header">
+    <div class="edit-header-left">
+      <button class="back-btn" id="backBtn">←</button>
+      <div class="edit-date" id="editDate">Tue, 27 Jan 26</div>
+    </div>
+    <div class="edit-header-right">
+      <button class="header-action-btn">◀</button>
+      <button class="header-action-btn">▶</button>
+      <button class="save-btn-header" id="saveBtnEdit">Save</button>
+    </div>
+  </div>
+
+  <div class="edit-body">
+    <input type="text" class="edit-heading" id="editHeading" placeholder="Heading">
+    <textarea class="edit-text" id="editText" placeholder="Text"></textarea>
+  </div>
+
+  <div class="edit-footer">
+    <button class="footer-action">
+      <span class="footer-action-icon">📷</span>
+      <span>Photo</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">🏷️</span>
+      <span>Tags</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">⭐</span>
+      <span>Rating</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">🎤</span>
+      <span>Audio</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">📎</span>
+      <span>File</span>
+    </button>
+    <button class="footer-action">
+      <span class="footer-action-icon">📍</span>
+      <span>Location</span>
+    </button>
+  </div>
+</div>
+
+<script>
+// ⚠️ IMPORTANT: Add your Google Apps Script URL here
+// Get it from: Apps Script → Deploy → Web app URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVbbshTAMuvN802qSPFqKEK5hix7A9UdnmMoptjDRZ0V800rDv-ta6xeizd4pFLnZH3A/exec";  // Leave empty to work without Google Sheets (demo mode)
 
 let currentDate = new Date();
 currentDate.setHours(0, 0, 0, 0); // Reset to midnight today
@@ -766,8 +1346,487 @@ function renderEntries() {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+  const todayDate = today.getDate();
   
-  for (let day = daysInMonth; day >= 1; day--) {
+  // Show from today down to day 1 (or full month if viewing past month)
+  const startDay = isCurrentMonth ? todayDate : daysInMonth;
+  
+  for (let day = startDay; day >= 1; day--) {
+    const dateStr = formatDate(year, month, day);
+    const dayEntries = diaryData.filter(entry => entry.date === dateStr);
+    
+    const entryItem = document.createElement("div");
+    entryItem.className = "entry-item";
+    
+    const date = new Date(dateStr);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+    
+    let entryContent = "";
+    if (dayEntries.length > 0) {
+      const entry = dayEntries[0];
+      entryContent = `
+        <div class="entry-title">${escapeHtml(entry.title)}</div>
+        ${entry.note ? `<div class="entry-preview">${escapeHtml(entry.note.substring(0, 60))}${entry.note.length > 60 ? "..." : ""}</div>` : ""}
+      `;
+      if (dayEntries.length > 1) {
+        entryContent += `<div class="entry-preview">+${dayEntries.length - 1} more</div>`;
+      }
+    } else {
+      entryContent = '<div class="no-entry">No entry</div>';
+    }
+    
+    entryItem.innerHTML = `
+      <div class="entry-date">
+        <div class="entry-day">${dayName}</div>
+        <div class="entry-number">${day}</div>
+      </div>
+      <div class="entry-content">
+        ${entryContent}
+      </div>
+    `;
+    
+    // Click to open entry editor
+    entryItem.addEventListener("click", () => {
+      openEditPage(dateStr, dayEntries.length > 0 ? dayEntries[0] : null);
+    });
+    
+    entriesList.appendChild(entryItem);
+  }
+}
+
+// Open edit page
+function openEditPage(dateStr, existingEntry = null) {
+  selectedDate = dateStr;
+  
+  const date = new Date(dateStr);
+  const dateDisplay = date.toLocaleDateString("en-US", { 
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "2-digit"
+  });
+  
+  editDate.textContent = dateDisplay.replace(',', ',');
+  
+  if (existingEntry) {
+    editHeading.value = existingEntry.title || "";
+    editText.value = existingEntry.note || "";
+  } else {
+    editHeading.value = "";
+    editText.value = "";
+  }
+  
+  mainView.style.display = "none";
+  entryEditPage.classList.add("show");
+  
+  // Focus on heading
+  setTimeout(() => editHeading.focus(), 100);
+}
+
+// Close edit page
+function closeEditPage() {
+  // Auto-save if there's content
+  const title = editHeading.value.trim();
+  const note = editText.value.trim();
+  
+  if ((title || note) && selectedDate) {
+    // Save silently
+    const heading = title || "Untitled";
+    
+    if (SCRIPT_URL && SCRIPT_URL !== "") {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          date: selectedDate, 
+          title: heading, 
+          note: note 
+        })
+      }).catch(err => console.error("Auto-save error:", err));
+    }
+    
+    // Update local data
+    const existingIndex = allData.findIndex(e => e.date === selectedDate);
+    if (existingIndex >= 0) {
+      allData[existingIndex] = { date: selectedDate, title: heading, note: note };
+    } else {
+      allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
+    }
+    
+    filterDataForCurrentMonth();
+  }
+  
+  entryEditPage.classList.remove("show");
+  mainView.style.display = "block";
+  renderCalendar();
+  renderEntries();
+}
+
+// Save entry
+function saveEntry() {
+  const title = editHeading.value.trim();
+  const note = editText.value.trim();
+  
+  if (!title && !note) {
+    alert("Please enter a heading or text");
+    return;
+  }
+  
+  const heading = title || "Untitled";
+  
+  if (!SCRIPT_URL || SCRIPT_URL === "") {
+    // Demo mode - just add locally
+    console.log("💾 Saved locally (demo mode)");
+    
+    const existingIndex = allData.findIndex(e => e.date === selectedDate);
+    if (existingIndex >= 0) {
+      allData[existingIndex] = { date: selectedDate, title: heading, note: note };
+    } else {
+      allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
+    }
+    
+    filterDataForCurrentMonth();
+    closeEditPage();
+    return;
+  }
+  
+  saveBtnEdit.disabled = true;
+  saveBtnEdit.textContent = "Saving...";
+  
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ 
+      date: selectedDate, 
+      title: heading, 
+      note: note 
+    })
+  })
+  .then(() => {
+    console.log("✅ Saved to Google Sheets");
+    
+    const existingIndex = allData.findIndex(e => e.date === selectedDate);
+    if (existingIndex >= 0) {
+      allData[existingIndex] = { date: selectedDate, title: heading, note: note };
+    } else {
+      allData.push({ date: selectedDate, title: heading, note: note, time: new Date().toISOString() });
+    }
+    
+    filterDataForCurrentMonth();
+    closeEditPage();
+    
+    setTimeout(() => loadData(), 1000);
+  })
+  .catch(err => {
+    console.error("❌ Error saving:", err);
+    alert("Failed to save. Check console.");
+  })
+  .finally(() => {
+    saveBtnEdit.disabled = false;
+    saveBtnEdit.textContent = "Save";
+  });
+}
+
+// Toggle search
+function toggleSearch() {
+  if (searchContainer.style.display === "none") {
+    searchContainer.style.display = "block";
+    searchBox.focus();
+  } else {
+    searchContainer.style.display = "none";
+    searchResults.classList.remove("show");
+    calendarView.style.display = "block";
+    searchBox.value = "";
+  }
+}
+
+// Perform search
+function performSearch() {
+  const query = searchBox.value.trim().toLowerCase();
+  
+  if (query === "") {
+    searchResults.classList.remove("show");
+    calendarView.style.display = "block";
+    return;
+  }
+  
+  calendarView.style.display = "none";
+  searchResults.classList.add("show");
+  
+  const results = allData.filter(entry => {
+    const titleMatch = entry.title && entry.title.toLowerCase().includes(query);
+    const noteMatch = entry.note && entry.note.toLowerCase().includes(query);
+    return titleMatch || noteMatch;
+  });
+  
+  if (results.length === 0) {
+    searchResults.innerHTML = '<div class="no-results">No entries found</div>';
+    return;
+  }
+  
+  searchResults.innerHTML = "";
+  
+  results.forEach(entry => {
+    const resultItem = document.createElement("div");
+    resultItem.className = "search-result-item";
+    
+    const date = new Date(entry.date);
+    const dateStr = date.toLocaleDateString("en-US", { 
+      weekday: "short",
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
+    });
+    
+    const titleHighlighted = highlightText(entry.title || "", query);
+    const noteHighlighted = highlightText(entry.note || "", query);
+    
+    resultItem.innerHTML = `
+      <div class="search-result-date">${dateStr}</div>
+      <div class="search-result-title">${titleHighlighted}</div>
+      ${entry.note ? `<div class="search-result-text">${noteHighlighted}</div>` : ""}
+    `;
+    
+    resultItem.addEventListener("click", () => {
+      searchContainer.style.display = "none";
+      searchResults.classList.remove("show");
+      calendarView.style.display = "block";
+      searchBox.value = "";
+      openEditPage(entry.date, entry);
+    });
+    
+    searchResults.appendChild(resultItem);
+  });
+}
+
+// Highlight search term
+function highlightText(text, query) {
+  if (!text) return "";
+  const regex = new RegExp(`(${query})`, "gi");
+  return escapeHtml(text).replace(regex, '<span class="highlight">$1</span>');
+}
+
+// Escape HTML
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Start app
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
+";  // Leave empty to work without Google Sheets (demo mode)
+
+let currentDate = new Date();
+currentDate.setHours(0, 0, 0, 0); // Reset to midnight today
+let selectedDate = null;
+let diaryData = [];
+let allData = []; // Store all data for search
+
+// DOM elements
+const calendar = document.getElementById("calendar");
+const monthYear = document.getElementById("monthYear");
+const entriesList = document.getElementById("entriesList");
+const prevMonth = document.getElementById("prevMonth");
+const nextMonth = document.getElementById("nextMonth");
+const mainView = document.getElementById("mainView");
+const entryEditPage = document.getElementById("entryEditPage");
+const backBtn = document.getElementById("backBtn");
+const editDate = document.getElementById("editDate");
+const editHeading = document.getElementById("editHeading");
+const editText = document.getElementById("editText");
+const saveBtnEdit = document.getElementById("saveBtnEdit");
+const searchToggle = document.getElementById("searchToggle");
+const searchContainer = document.getElementById("searchContainer");
+const searchBox = document.getElementById("searchBox");
+const searchResults = document.getElementById("searchResults");
+const calendarView = document.getElementById("calendarView");
+
+// Initialize
+function init() {
+  console.log("🚀 Diarium initialized");
+  loadData();
+  setupEventListeners();
+}
+
+// Setup event listeners
+function setupEventListeners() {
+  prevMonth.addEventListener("click", () => changeMonth(-1));
+  nextMonth.addEventListener("click", () => changeMonth(1));
+  backBtn.addEventListener("click", closeEditPage);
+  saveBtnEdit.addEventListener("click", saveEntry);
+  searchToggle.addEventListener("click", toggleSearch);
+  searchBox.addEventListener("input", performSearch);
+}
+
+// Load data from Google Sheets
+function loadData() {
+  if (!SCRIPT_URL || SCRIPT_URL === "") {
+    console.log("📝 Demo mode - no Google Sheets connected");
+    diaryData = [];
+    allData = [];
+    renderCalendar();
+    renderEntries();
+    return;
+  }
+
+  fetch(SCRIPT_URL)
+    .then(res => res.json())
+    .then(data => {
+      allData = data || [];
+      filterDataForCurrentMonth();
+      renderCalendar();
+      renderEntries();
+      console.log("✅ Data loaded:", allData.length, "entries");
+    })
+    .catch(err => {
+      console.error("❌ Error loading data:", err);
+      diaryData = [];
+      allData = [];
+      renderCalendar();
+      renderEntries();
+    });
+}
+
+// Filter data for current month
+function filterDataForCurrentMonth() {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const monthStr = `${year}-${String(month + 1).padStart(2, "0")}`;
+  
+  diaryData = allData.filter(entry => entry.date && entry.date.startsWith(monthStr));
+}
+
+// Render calendar
+function renderCalendar() {
+  calendar.innerHTML = "";
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  monthYear.textContent = currentDate.toLocaleString("default", { 
+    month: "long", 
+    year: "numeric" 
+  });
+  
+  const firstDay = new Date(year, month, 1).getDay();
+  const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+  
+  const today = new Date();
+  const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+  const todayDate = today.getDate();
+  
+  // Previous month days
+  for (let i = firstDayAdjusted - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const div = createDayElement(day, true);
+    calendar.appendChild(div);
+  }
+  
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const div = createDayElement(day, false);
+    const dateStr = formatDate(year, month, day);
+    
+    if (allData.some(entry => entry.date === dateStr)) {
+      div.classList.add("has-entry");
+    }
+    
+    if (isCurrentMonth && day === todayDate) {
+      div.classList.add("today");
+    }
+    
+    if (selectedDate === dateStr) {
+      div.classList.add("selected");
+    }
+    
+    div.addEventListener("click", () => selectDate(dateStr, div));
+    calendar.appendChild(div);
+  }
+  
+  // Next month days
+  const totalCells = calendar.children.length;
+  const remainingCells = 42 - totalCells;
+  
+  for (let day = 1; day <= remainingCells; day++) {
+    const div = createDayElement(day, true);
+    calendar.appendChild(div);
+  }
+}
+
+// Create day element
+function createDayElement(day, isOtherMonth) {
+  const div = document.createElement("div");
+  div.className = "calendar-day";
+  div.textContent = day;
+  
+  if (isOtherMonth) {
+    div.classList.add("other-month");
+  }
+  
+  return div;
+}
+
+// Format date
+function formatDate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// Select date
+function selectDate(dateStr, element) {
+  selectedDate = dateStr;
+  
+  document.querySelectorAll(".calendar-day").forEach(d => {
+    d.classList.remove("selected");
+  });
+  
+  if (element) {
+    element.classList.add("selected");
+  }
+}
+
+// Change month
+function changeMonth(direction) {
+  currentDate.setMonth(currentDate.getMonth() + direction);
+  selectedDate = null;
+  filterDataForCurrentMonth();
+  renderCalendar();
+  renderEntries();
+}
+
+// Render entries list
+function renderEntries() {
+  entriesList.innerHTML = "";
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
+  const todayDate = today.getDate();
+  
+  // Show from today down to day 1 (or full month if viewing past month)
+  const startDay = isCurrentMonth ? todayDate : daysInMonth;
+  
+  for (let day = startDay; day >= 1; day--) {
     const dateStr = formatDate(year, month, day);
     const dayEntries = diaryData.filter(entry => entry.date === dateStr);
     
