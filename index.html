@@ -578,9 +578,10 @@
 <script>
 // ⚠️ IMPORTANT: Add your Google Apps Script URL here
 // Get it from: Apps Script → Deploy → Web app URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxMluN4wlGmiUrUUeKGsHuKsmeCGpqi-Cc7MVi5S9QfxT2dFSM4d96LlfjOgiB8mVEmsg/exec";  // Leave empty to work without Google Sheets (demo mode)
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxCSVNczIFh56RJkAIMeC10pYGJRnL7J5ECTtoOYOighGeXcGOuIztZ11yHoBCCpQmUCw/exec";  // Leave empty to work without Google Sheets (demo mode)
 
 let currentDate = new Date();
+currentDate.setHours(0, 0, 0, 0); // Reset to midnight today
 let selectedDate = null;
 let diaryData = [];
 let allData = []; // Store all data for search
