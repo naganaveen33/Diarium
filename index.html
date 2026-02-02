@@ -757,6 +757,11 @@ function selectDateAndRender(dateStr, element, clickedDate) {
   
   // Re-render entries starting from clicked date
   renderEntries(clickedDate);
+  
+  // Scroll to top of entries list to show the selected date
+  setTimeout(() => {
+    entriesList.scrollTop = 0;
+  }, 50);
 }
 
 function changeMonth(direction) {
