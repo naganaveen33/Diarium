@@ -6,7 +6,7 @@ on:
   
   # Optional: Also update daily at midnight UTC
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '*/5 * * * *'
 
 jobs:
   screenshot:
